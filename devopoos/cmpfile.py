@@ -20,16 +20,14 @@ def main(config):
     if parser.dst:
         src_md5 = parser.src
         if os.path.isfile(parser.src):
-            with open(parser.src, 'r') as f:
-                src_md5 = f.read()
+            src_md5 = gen_file_md5(parser.src)
 
             if parser.boolean_mtime:
                 src_md5 = "{}{}".format(src_md5, os.path.getmtime(parser.src))
 
         dst_md5 = parser.dst
         if os.path.isfile(parser.dst):
-            with open(parser.dst, 'r') as f:
-                dst_md5 = f.read()
+            dst_md5 = gen_file_md5(parser.dst)
 
             if parser.boolean_mtime:
                 dst_md5 = "{}{}".format(dst_md5, os.path.getmtime(parser.dst))
