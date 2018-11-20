@@ -1,9 +1,10 @@
 import hashlib
 import os
+
 from devopoos.util.fn import F
 
 
-def _gen_file_md5(filepath):
+def gen_file_md5(filepath):
     """Returns md5 string of the indicated file
     """
     size = 8024
@@ -18,7 +19,7 @@ def _gen_file_md5(filepath):
     return str_md5
 
 
-def _gen_files_md5(dir, ignore=F):
+def gen_files_md5(dir, ignore=F):
     """Returns pairs consist of filepath and md5 string
     """
     files_md5 = []
@@ -26,7 +27,7 @@ def _gen_files_md5(dir, ignore=F):
         for filename in filenames:
             if not ignore(filename):
                 filepath = os.path.join(curr_dir, filename)
-                files_md5.append((filepath, _gen_file_md5(filepath)))
+                files_md5.append((filepath, gen_file_md5(filepath)))
 
     return files_md5
 
@@ -39,9 +40,9 @@ def gen_files_md5(path, ignore=F, mtime=False):
 
     md5s = []
     if os.path.isfile(path):
-        md5s.append((path, _gen_file_md5(path)))
+        md5s.append((path, gen_file_md5(path)))
     else:
-        md5s = _gen_files_md5(path, ignore)
+        md5s = gen_files_md5(path, ignore)
 
     if mtime:
         md5s = map(lambda (filepath, md5): (filepath, "%s%s" %

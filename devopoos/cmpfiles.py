@@ -7,10 +7,6 @@ from devopoos.util import gen_files_md5, stringify_texttable, parse_texttable
 from devopoos.util.fn import rfind, complement, F
 
 
-logging.basicConfig(
-    level=logging.DEBUG, format='%(asctime)s : %(levelname)s : %(message)s')
-
-
 def gen_md5_list(dir, ignore, mtime):
     ignore = rfind(ignore) if ignore else F
     md5_list = gen_files_md5(dir, ignore, mtime)
