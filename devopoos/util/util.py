@@ -45,8 +45,12 @@ def gen_files_md5(path, ignore=F, mtime=False):
         md5s = gen_files_md5(path, ignore)
 
     if mtime:
-        md5s = map(lambda (filepath, md5): (filepath, "%s%s" %
-                                            (md5, os.path.getmtime(filepath))), md5s)
+        _md5s = []
+        for filepath, md5 in md5s:
+            _md5s.append((filepath, "%s%s" %
+                          (md5, os.path.getmtime(filepath))))
+
+        md5s = _md5s
 
     return md5s
 
