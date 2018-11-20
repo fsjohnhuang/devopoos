@@ -1,5 +1,4 @@
 import os
-import ConfigParser
 
 
 class Config():
