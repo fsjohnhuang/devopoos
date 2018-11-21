@@ -5,6 +5,7 @@ import argparse
 from config import Config
 from devopoos import cmpfiles
 from devopoos import cmpfile
+from devopoos import win_acl
 
 logging.basicConfig(
     level=logging.DEBUG, format='%(asctime)s : %(levelname)s : %(message)s')
@@ -12,7 +13,7 @@ logging.basicConfig(
 
 def _command_parser():
     parser = argparse.ArgumentParser(description='Welcome to use devopoos!')
-    parser.add_argument('command', choices=['cmpfiles', 'cmpfile'])
+    parser.add_argument('command', choices=['cmpfiles', 'cmpfile', 'win_acl'])
 
     return parser.parse_args()
 
@@ -33,6 +34,8 @@ def main():
         cmpfiles.main(config)
     elif 'cmpfile' == cmd:
         cmpfile.main(config)
+    elif 'win_acl' == cmd:
+        win_acl.main(config)
 
 
 if '__main__' == __name__:
