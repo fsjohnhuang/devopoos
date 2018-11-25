@@ -1,0 +1,320 @@
+* 初始化进程(服务)
+Linux 启用过程为：BIOS -> Boot Loader -> 加载系统内核 -> 内核初始化 -> 启用初始化进程(服务) -> 初始化进程作为第一个进程，完成Linux相关初始化工作
+
+传统的初始化进程服务为 System V init
+新的为 systemd
+
+** 运行级别
+| System V init 运行级别 | systemd 目标名称                    | 作用                      |
+|------------------------+-------------------------------------+---------------------------|
+|                      0 | runlevel0.target, poweroff.target   | 关机                      |
+|                      1 | runlevel1.target, rescue.target     | 单用户模式                |
+|                      2 | runlevel2.target, multi-user.target | 多用户文本模式，不支持NFS |
+|                      3 | runlevel3.target, multi-user.target | 多用户文本模式            |
+|                      4 | runlevel4.target, multi-user.target | 保留，等同于等级3         |
+|                      5 | runlevel5.target, graphical.target  | 多用户图形模式            |
+|                      6 | runlevel6.target, reboot.target     | 重启                      |
+|              emergency | emergency.target                    | 紧急Shell                 |
+
+systemd 中切换默认运行目标命令为 ~ln -sf /lib/systemd/sys/multi-user.target /etc/systemd/system/default.target~
+
+** 服务管理
+| System V init 命令  | systemctl 命令                           | 作用                           |
+|---------------------+------------------------------------------+--------------------------------|
+| service foo start   | systemctl start foo.service              | 启动服务                       |
+| service foo restart | systemctl restart foo.service            | 重启服务                       |
+| service foo stop    | systemctl stop foo.service               | 停止服务                       |
+| service foo reload  | systemctl reload foo.service             | 不终止服务下重新加载配置文件   |
+| service foo status  | systemctl status foo.service             | 查看服务状态                   |
+| chkconfig foo on    | systemctl enable foo.service             | 开机自动启动                   |
+| chkconfig foo off   | systemctl disable foo.service            | 开机不自动启动                 |
+| chkconfig foo       | systemctl is-enabled foo.service         | 查看某服务是否开机自动启动     |
+| chkconfig --list    | systemctl list-unit-files --type=service | 查看各级别服务的启动和禁用情况 |
+
+
+** TODO Linux系统的启动过程和初始化
+
+*** Ref
+https://www.cnblogs.com/root-wang/p/4175103.html
+
+* 常用命令
+** date
+#+begin_src
+# 返回系统当前时间
+date
+
+# 以指定格式返回系统当前时间
+# %H-24进制小时
+# %I-12进制小时
+# %j-当年第几天
+date "+%Y-%m-%d %H:%M:%S"
+
+# 修改系统当前时间
+date -s "20170901 8:30:00"
+#+end_src
+
+** wget
+用于下载网络资源
+#+begin_src
+# -b 后台下载模式
+# -P <dst> 下载指定目录
+# -t <times> 最大尝试次数
+# -c 断点续传
+# -p 下载页面内的所有资源
+# -r 递归下载
+wget [options] <url>
+#+end_src
+
+** ps
+~ps uax~ ，查看所有进程(a)，用户及其他详细信息(u)，显示没有控制终端的进程(x) 信息
+
+*** Linux进程5种状态
+1) R(运行): 进程处于运行或就绪状态
+2) S(中断): 进程处于休眠状态，当某条件形成后或接收到信号时，就会脱离此状态
+3) D(不可中断): 进程不响应系统异步信号，即使kill命令发起的信号也不接收
+4) Z(僵死): 进程已经结束，但进程描述符依然存在，直到父进程调用wait4()系统函数后将进程释放
+5) T(停止): 进程收到停止信号停止运行
+
+
+*** 输出列说明
+| USER         | PID    | %CPU      | %MEM       | VSZ                | RSS                | TTY      | STAT     | START      | TIME              | COMMAND        |
+|--------------+--------+-----------+------------+--------------------+--------------------+----------+----------+------------+-------------------+----------------|
+| 进程的所有者 | 进程ID | CPU占用率 | 内存占用率 | 虚拟内存使用量(KB) | 物理内存使用量(KB) | 所在终端 | 进程状态 | 被启动时间 | 实际使用CPU的时间 | 命令名称和参数 |
+
+** top
+动态监视进程活动、服务器负载情况。增强版的Windows任务管理器。
+命令： ~top~
+
+*** 输出说明
+1) 第一行：系统时间、运行时长、终端数量、1分钟系统负载平均值、5分钟负载平均值、15分钟负载平均值（数值越低越好，1表示100%的意思）
+2) 第二行：进程总数、运行的进程数、休眠的进程数、停止的进程数、僵死的进程数
+3) 第三行：用户空间CPU占用率、系统内核空间CPU占用率、改变优先级的进程CPU占用率、CPU空闲率
+4) 第四行：物理内容总量(KB)、使用量(KB)、空闲量(KB)、作为内核缓存容量(buffers, KB)
+5) 第五行：虚拟内存总量(KB)、使用量(KB)、空闲量(KB)、已被提前加载的内存量(cached Mem, KB)
+
+
+** pidof
+~pidof [options] <service-name>~ 获取服务的PID
+~echo $$~ 获取当前程序的进程PID
+
+** kill
+~kill [options] <pid>~ 向指定PID的进程发送中止信号
+
+** killall
+~kill [options] <service-name>~ 向指定服务的所有进程发送中止信号
+
+** uname
+~uname -a~ 查看系统内核和系统的版本信息
+
+查看系统的详细版本信息，则执行 ~cat /etc/os-release~ 或 ~cat /etc/redhat-release~
+
+** uptime
+获取top命令第一行的内容
+
+** free
+~free -h~ 显示当前系统中内存的使用量信息
+
+*** 输出说明
+|                   | 内存总量 | 已用量 | 可用量 | 进程共享的内存量 | 磁盘缓存的内存量 | 缓存的内存量 |
+|-------------------+----------+--------+--------+------------------+------------------+--------------|
+|                   | total    | used   | free   | shared           | buffers          | cached       |
+| Mem               | 1.8GB    | 1.3GB  | 542MB  | 9.8MB            | 1.6MB            | 413MB        |
+| -/+ buffers/chace |          | 869MB  | 957MB  |                  |                  |              |
+| Swap              | 2.0GB    | 0      | 2.0GB  |                  |                  |              |
+
+*** TODO QA [0/1]
+1) [ ] 输入中每一行的意思？
+
+** who 和 last
+~who~ 查看当前登入主机的用户名、终端设置和登录时间。
+~last~ 查看所有系统登录信息（包含历史信息），但由于历史信息记录在日志文件中，因此可以被篡改。
+
+** sosreport
+用于收集系统配置及架构信息并输出诊断文档，格式为sosreport.
+
+** tr
+替换、删除文本文件中的指定字符集（不是字符串）
+~cat foo | tr a-z A-Z~ 即将foo文件内容的[a-z]匹配内容替换为[A-Z]
+~cat foo | tr -d abc~ 即删除所有a、b和c字符
+
+** wc
+统计指定文本行数、单词/字数、字节数
+~wc -l -w -c <file_path>~
+
+** cut
+按"列"提取文本字符
+#+begin_src
+# 以:为分隔符，提取第一个列的内容
+cut -d: -f1 /etc/passwd
+#+end_src
+
+** diff
+比较多个文本文件的差异
+~diff --brief a.txt b.txt~ 判断两个文件是否一致
+~diff -c a.txt b.txt~ 列出具体详细的差异处
+
+** cp
+复制文件或目录, ~cp [options] <src> <dst>~
+| OPTION  | 作用                                    |
+|---------+-----------------------------------------|
+| -p      | 保留原始文件的属性                      |
+| -d      | 若src为链接文件，则保留该链接文件的属性 |
+| -r      | 递归持续复制（用于目录）                |
+| -i      | 若dst文件存在则询问是否覆盖             |
+| -a      | 相当于-pdr                              |
+
+** dd
+按照指定大小和个数的数据库块(block)来复制文件或转换文件
+Linux 中的 /dev/zero 文件不会占用存储空间，却能提供无穷无尽的数据，因此可以配合dd生成指定大小的测试文件。
+#+begin_src
+# if 为输入文件路径
+# of 为输出文件路径
+# count 块个数
+# bs 块大小
+dd if=/dev/zero of=560_file count=1 bs=560M
+
+# 从光驱设备制作iso格式的镜像文件
+dd if=/dev/cdrom of=xxx.iso
+#+end_src
+
+** stat 和 file
+~stat <file_path>~ 查看文件的atime,mtime,ctime 和 大小等信息
+~file <file_path>~ 查看文件的类型
+
+** find
+按指定条件查找文件， ~find [path] options operation~
+| OPTION             | 作用                                                             |
+|--------------------+------------------------------------------------------------------|
+| -name              | 匹配名称(匹配以j开头的名称时，写成j*                             |
+| -perm              | 匹配权限(mode为完全匹配，-mode为包含匹配                         |
+| -user              | 匹配所有者                                                       |
+| -group             | 匹配所属组                                                       |
+| -mtime -n +n       | 匹配修改时间(-n为n天以内，+n为n天以前                            |
+| -atime -n +n       | 匹配访问时间(-n为n天以内，+n为n天以前                            |
+| -ctime -n +n       | 匹配修改权限时间(-n为n天以内，+n为n天以前                        |
+| -nouser            | 匹配没有所有者                                                   |
+| -nogroup           | 匹配无所属组                                                     |
+| -newer f1 !f2      | 匹配比文件f1新但比f2旧的                                         |
+| --type b/d/c/p/l/f | 匹配文件类型（块设备、目录、字符设备、管道、链接文件、文本文件） |
+| -size              | 匹配文件大小（+为超过，-为小于）                                 |
+| -prune             | 忽略某个目录                                                     |
+| -exec ....{}\;     | 对匹配项进行下一步操作，其中{}代表匹配项，且必须以\;结尾         |
+| -print             | 打印出匹配项                                                     |
+
+#+begin_src
+# 将以host开头的文本文件复制到家目录下
+find /etc/ -name "host*" -type f -exec cp -a {} ~/etc/ \;
+#+end_src
+
+* 重定向
+标准输入(stdin)的文件描述符为0，默认从键盘输入，可以从其它文件或命令中输入
+标准输出(stdout)的文件描述符为1，默认输出到屏幕
+错误输出(stderr)的文件描述符为2，默认输出到屏幕
+
+** 输入重定向
+| 符号                 | 作用                                |
+|----------------------+-------------------------------------|
+| 命令 < 文件          | 将文件内容作为stdin                 |
+| 命令 << 分界符       | 从stdin中读取，直到遇到分界符才停止 |
+| 命令 < 文件1 > 文件2 | 将文件1作为stdin，文件2作为stdout   |
+
+** 输出重定向
+| 符号                               | 作用                                       |
+|------------------------------------+--------------------------------------------|
+| 命令 > 文件                        | 将stdout重定向到一个文件（清空原内容）     |
+| 命令 2> 文件                       | 将stderr重定向到一个文件（清空原内容）     |
+| 命令 >> 文件                       | 将stdout重定向到一个文件（原内容末尾追加） |
+| 命令 2>> 文件                      | 将stdout重定向到一个文件（原内容末尾追加） |
+| 命令 >> 文件 2>&1 或 命令 &>> 文件 | 将stdout和stderr都追加到同一个文件         |
+
+** 管道
+将stdout重定向到stdin，从而连接一连串命令
+
+* 命令行通配符GLOB
+#+begin_src
+* 代表匹配零个或多个字符
+? 代表匹配单个字符
+[0-9] 代表匹配0到9的单个数字字符
+[abc] 代表匹配a、b、c的单个字符
+#+end_src
+
+* 命令行转移字符
+1) \ 后面的变量变成单纯的字符串
+2) '' 单引号内的变量变成单纯的字符串
+3) "" 双引号内的变量运算得到实际值
+4) `` 反引号内的命令运算后返回结果
+
+* 系统环境变量
+
+** 在shell中执行命令的处理流程
+1) 识别是否为绝对路径或相对路径，是则到第3步
+2) 识别命令是否为别名
+   1) 增加别名， ~alias foo = rm~
+   2) 删除别名， ~unalias foo~
+3) 识别是内部还是外部命令，内部则直接执行。但一般都是外部命令
+4) 通过系统环境变量PATH搜索外部命令执行路径
+
+注意：不将当前目录 ~.~ 加入到PATH中，因为若黑客在公共目录/tmp中放一个名为ls的木马文件，那么就会执行恶意代码。所以在执行命令前必须先检查PATH有没有设置 ~.~ 。
+
+
+** 10个重要的环境变量
+| 变量名称     | 作用                          |
+|--------------+-------------------------------|
+| HOME         | 用户的主目录路径              |
+| SHELL        | 用户使用的Shell解释器文件路径 |
+| HISTSIZE     | 输出的历史命令记录条数        |
+| HISTFILESIZE | 保存的历史命令记录条数        |
+| MAIL         | 邮件保存路径                  |
+| LANG         | 系统语言、语系名称            |
+| RANDOM       | 生成一个随机数字              |
+| PS1          | Bash解释器的提示符            |
+| PATH         | 外部命令的解释路径            |
+| EDITOR       | 默认文本编辑器                |
+
+** 查看环境变量
+1) 查看单个， ~echo $PATH~
+2) 查看所有， ~env~
+
+
+** 设置环境变量
+1) 当前会话有效， ~WORKDIR=/home/workdir~
+2) 全局有效， ~export WORKDIR=/home/workdir~
+
+
+* login shell 和 non-login shell
+login shell: shell等待用户输入，并执行用户输入的命令，直到用户执行退出命令时shell才结束。
+non-login shell: shell读取文件中的命令并执行，直到文件读取完毕后shell结束。
+
+
+/etc/profile 存储系统全局环境变量，并执行 /etc/profile.d 下的配置 和 /etc/inputrc 的配置等
+/etc/bashrc 存储的是bash相关的全局环境变量
+
+** shell进程启动时读取配置的流程
+1) 读取全局环境变量档案 /etc/profile ，然后根据内容读取如 /etc/profile.d/* 和 /etc/inputrc 等配置；
+2) 根据用户帐号读取 ~/.bash_profile , ~/.bash_login 和 ~/.profile 的配置，三个文件的读取规则是依次读取，文件存在即不再往后读取；
+
+3) 最后再读取 ~/.bashrc 的配置
+
+
+
+* 文件系统
+** atime、mtime 和 ctime
+在 Windows 中有创建时间、修改时间和访问时间，然而在Linux当中却是访问时间(access time abbr. atime)、修改时间(modify time abbr. mtime)和状态修改时间(change time aka. ctime)
+
+1) atime 
+文件：记录文件最后被访问的时间（如用户或程序直接或间接访问）
+目录：查看目录下文件列表的时间(~ls <dir>~)
+2) mtime
+文件：记录文件内容（Block）被修改的最后时间
+目录：新增、修改、删除子文件、目录的时间（但不是实时的）
+3) ctime
+文件：记录文件的权限、拥有者、所属组、连接数和内容（inode和Block）发生变化的最后时间
+目录：新增、修改、删除子文件、目录的时间（但不是实时的）
+
+*** 查看
+~ls -l~ ，显示的是精确度到分钟的mtime
+~stat <filepath>~ ，显示完整的 atime, mtime 和 ctime
+
+*** realtime
+从kernel2.6.29开始默认集成了realtime，用于当为提高效率禁用atime时，比较当mtime大于atime时才更新atime的方式兼容依赖atime的程序，即atime与mtime永远一致。
+在挂载时 ~mount -o realtime /dir~ 启用。
