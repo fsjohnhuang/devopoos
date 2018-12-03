@@ -1,0 +1,39 @@
+* 配置
+#+BEGIN_SRC 
+# 提交者的信息显示在更新历史中
+git config --global user.name '<user name>'
+git config --global user.email '<user email>'
+
+# 彩色显示
+git config --global color.ui auto
+
+# 正常显示中文文件名
+git config --global core.quotepath off
+
+# 子命令别名
+git config --global alias.co checkout
+#+END_SRC
+
+
+上述配置会保存到~/.gitconfig文件中
+
+* 操作
+
+
+* 文件对比
+#+BEGIN_SRC
+# 比较工作区和暂存区中指定文件
+git diff <filepath>
+
+# 比较工作区和当前分支中指定文件
+git diff HEAD <filepath>
+
+# 比较暂存区和当前分支中指定文件
+git diff --cached <filepath>
+
+# 比较某分支和当前分支中指定文件
+git diff <branch_name> <filepath>
+
+# 与某次提交进行比较
+git diff <commit_id> <filepath>
+#+END_SRC

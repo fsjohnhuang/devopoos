@@ -1,0 +1,13 @@
+  /home/john/project/devopoos/devopoos:
+  total used in directory 41 available 118395452
+  drwxrwxrwx 1 root root 4096 11月 28 15:16 .
+  drwxrwxrwx 1 root root 4096 11月 21 18:00 ..
+  -rwxrwxrwx 1 root root  681 11月 28 14:15 cmpfile.py
+  -rwxrwxrwx 1 root root 1464 11月 20 14:20 cmpfile.pyc
+  -rwxrwxrwx 1 root root 1787 11月 28 15:16 cmpfiles.py
+  -rwxrwxrwx 1 root root 3720 11月 20 14:18 cmpfiles.pyc
+  -rwxrwxrwx 1 root root   37 11月 17 01:19 __init__.py
+  -rwxrwxrwx 1 root root  215 11月 17 01:19 __init__.pyc
+  drwxrwxrwx 1 root root 4096 11月 28 15:05 __pycache__
+  drwxrwxrwx 1 root root 4096 11月 28 15:07 util
+  -rwxrwxrwx 1 root root 4053 11月 21 17:43 win_acl.py
